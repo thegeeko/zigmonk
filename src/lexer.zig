@@ -89,7 +89,7 @@ pub const Lexer = struct {
     }
 
     fn peak_ch(self: *Self) u8 {
-        if (self.read_pos > self.src.len) return 0;
+        if (self.read_pos >= self.src.len) return 0;
         return self.src[self.read_pos];
     }
 

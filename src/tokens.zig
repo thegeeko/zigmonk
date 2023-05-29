@@ -50,4 +50,36 @@ pub const Token = union(enum) {
 
         return .{ .identifier = word };
     }
+
+    pub fn to_string(self: @This()) []const u8 {
+        return switch (self) {
+            .illeagl => "illeagl",
+            .eof => "eof",
+            .identifier => "identifier",
+            .int => "integer",
+            .assign => "assign",
+            .plus => "plus",
+            .minus => "minus",
+            .bang => "bang",
+            .asterisk => "asterisk",
+            .slash => "slash",
+            .lt => "lt",
+            .gt => "gt",
+            .eq => "eq",
+            .not_eq => "not_eq",
+            .comma => "comma",
+            .semicolon => "semicolon",
+            .l_paren => "l_paren",
+            .r_paren => "r_paren",
+            .l_bracket => "l_bracket",
+            .r_bracket => "r_bracket",
+            .function => "function",
+            .let => "let",
+            .m_true => "true",
+            .m_false => "false",
+            .m_if => "if",
+            .m_else => "else",
+            .m_return => "return ",
+        };
+    }
 };

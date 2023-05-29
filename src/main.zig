@@ -1,7 +1,6 @@
 const std = @import("std");
+const repl = @import("repl.zig");
 
-test {
-    _ = @import("lexer.zig");
+pub fn main() !void {
+    try repl.start();
 }
-
-pub fn main() !void {}
