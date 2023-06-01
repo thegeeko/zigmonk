@@ -31,17 +31,10 @@ pub const Lexer = struct {
         self.skip_whitespace();
 
         const token: Token = switch (self.curr_ch) {
-            '=' => (
-                if (self.peak_ch() == '=') {
-                    // hack you can't mix if and switch
-                    self.read_ch();
-                    self.read_ch();
-                    return .eq;
-                } else {
-                    self.read_ch();
-                    return .assign;
-                }
-            ),
+            '=' => if (self.peak_ch() == '=')
+                .eq
+            else
+                .assign,
             ';' => .semicolon,
             ',' => .comma,
             '(' => .l_paren,
@@ -50,17 +43,10 @@ pub const Lexer = struct {
             '}' => .r_bracket,
             '+' => .plus,
             '-' => .minus,
-            '!' => {
-                if (self.peak_ch() == '=') {
-                    // hack you can't mix if and switch
-                    self.read_ch();
-                    self.read_ch();
-                    return .not_eq;
-                } else {
-                    self.read_ch();
-                    return .bang;
-                }
-            },
+            '!' => if (self.peak_ch() == '=')
+                .not_eq
+            else
+                .bang,
             '/' => .slash,
             '*' => .asterisk,
             '>' => .gt,
@@ -72,6 +58,9 @@ pub const Lexer = struct {
             0 => .eof,
             else => .illeagl,
         };
+
+        if (token == .eq or token == .not_eq)
+            self.read_ch();
 
         self.read_ch();
         return token;
@@ -213,7 +202,7 @@ test "lexer" {
         .semicolon,
         .{ .int = "10" },
         .not_eq,
-        .{ .int = "5" },
+        .{ .int = "8" },
         .semicolon,
         .eof,
     };
@@ -221,8 +210,6 @@ test "lexer" {
     var lex = Lexer.init(src);
     for (expected) |t| {
         const lex_token = lex.next_token();
-        expectEqualDeep(t, lex_token) catch {
-            std.debug.panic("\n\n Error: expected ({}) but found ({})  \n\n", .{ t, lex_token });
-        };
+        try expectEqualDeep(t, lex_token);
     }
 }
