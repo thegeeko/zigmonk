@@ -4,7 +4,7 @@ const Token = @import("./tokens.zig").Token;
 // @TODO support full unicode range
 
 fn is_char(ch: u8) bool {
-    return std.ascii.isAlphabetic(ch) or ch == '_';
+    return std.ascii.isAlphanumeric(ch) or ch == '_';
 }
 
 fn is_int(ch: u8) bool {
@@ -127,7 +127,7 @@ test "lexer" {
         \\    return false;
         \\}
         \\10 == 10;
-        \\10 != 5;
+        \\10 != 8;
     ;
 
     const expected = [_]Token{
@@ -208,8 +208,11 @@ test "lexer" {
     };
 
     var lex = Lexer.init(src);
+    var i: i32 = 0;
     for (expected) |t| {
         const lex_token = lex.next_token();
+        std.debug.print("{}- tokens: {}, {} \n", .{ i, t, lex_token });
         try expectEqualDeep(t, lex_token);
+        i += 1;
     }
 }
