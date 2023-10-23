@@ -48,6 +48,10 @@ pub const Parser = struct {
         return parser;
     }
 
+    pub fn deinit(self: *Self) void {
+        self.errors.deinit();
+    }
+
     pub fn parse_program(self: *Self) Program {
         var program = Program.init(self.allocator);
 
@@ -115,8 +119,14 @@ pub const Parser = struct {
     }
 
     fn parse_return_statment(self: *Self) Statment {
-        _ = self;
-        return .null;
+        var ret_statment = Ast.ReturnStatment{
+            .value = .null,
+        };
+
+        while (self.curr_token != .semicolon)
+            self.next_token();
+
+        return Statment{ .m_return = ret_statment };
     }
 
     fn parse_if_statment(self: *Self) Statment {
@@ -137,6 +147,6 @@ pub const Parser = struct {
         var lexer = Lexer.init(src);
         var parser = Parser.init(&lexer, alloc);
         var program: Program = parser.parse_program();
-        expectEqual(program.statments.items.len, 3);
+        try expectEqual(program.statments.items.len, 3);
     }
 };
