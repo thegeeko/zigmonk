@@ -111,6 +111,7 @@ pub const Lexer = struct {
 };
 
 test "lexer" {
+    std.debug.print("\n\n============ lexer test =============", .{});
     const expectEqualDeep = @import("std").testing.expectEqualDeep;
     const src =
         \\let five = 5;
@@ -207,11 +208,22 @@ test "lexer" {
         .eof,
     };
 
+    var ta = std.testing.allocator_instance;
+    const alloc = ta.allocator();
+
     var lex = Lexer.init(src);
     var i: i32 = 0;
+    std.debug.print("\nSource: \n{s}\n", .{src});
+    std.debug.print("\nTokens: \n", .{});
     for (expected) |t| {
         const lex_token = lex.next_token();
-        std.debug.print("{}- tokens: {}, {} \n", .{ i, t, lex_token });
+
+        const found_string = lex_token.to_string(alloc);
+        defer alloc.free(found_string);
+        const exp_string = t.to_string(alloc);
+        defer alloc.free(exp_string);
+
+        std.debug.print("   |-({}) expected: {s}, found: {s} \n", .{ i, exp_string, found_string });
         try expectEqualDeep(t, lex_token);
         i += 1;
     }

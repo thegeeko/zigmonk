@@ -89,7 +89,9 @@ pub const Parser = struct {
 
     fn parse_let_statment(self: *Self) Statment {
         if (self.peek_token != .identifier) {
-            var m_erorr = Error.make_error(self.allocator, "Expected token of type Identifer found {s} \n", .{self.peek_token.to_string()});
+            const token_str = self.peek_token.to_string(self.allocator);
+            defer self.allocator.free(token_str);
+            var m_erorr = Error.make_error(self.allocator, "Expected token of type Identifer found {s} \n", .{token_str});
             self.errors.append(m_erorr) catch {
                 unreachable;
             };
@@ -104,7 +106,9 @@ pub const Parser = struct {
         };
 
         if (self.peek_token != .assign) {
-            var m_erorr = Error.make_error(self.allocator, "Expected token of type Assign found {s} \n", .{self.peek_token.to_string()});
+            const token_str = self.peek_token.to_string(self.allocator);
+            defer self.allocator.free(token_str);
+            var m_erorr = Error.make_error(self.allocator, "Expected token of type Assign found {s} \n", .{token_str});
             self.errors.append(m_erorr) catch {
                 unreachable;
             };
@@ -136,3 +140,33 @@ pub const Parser = struct {
         return .null;
     }
 };
+
+test "Parser" {
+    std.debug.print("\n\n============ parser test =============", .{});
+    std.testing.log_level = std.log.Level.debug;
+
+    var ta = std.testing.allocator_instance;
+    const alloc = ta.allocator();
+
+    const src =
+        \\ let a = 10;
+        \\ let b = 20;
+        \\ let c = 30;
+        \\ return 10;
+    ;
+
+    var lexer = Lexer.init(src);
+    var parser = Parser.init(&lexer, alloc);
+    defer parser.deinit();
+
+    var program = parser.parse_program();
+    defer program.deinit();
+    var program_string = program.to_string(alloc);
+    defer alloc.free(program_string);
+
+    std.debug.print("\nSource: \n{s}\n", .{src});
+    std.debug.print("\nAST: \n{s} ", .{program_string});
+
+    var size: usize = 4;
+    try std.testing.expectEqual(size, program.statments.items.len);
+}
