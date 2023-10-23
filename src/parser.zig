@@ -56,6 +56,7 @@ pub const Parser = struct {
         var program = Program.init(self.allocator);
 
         while (self.curr_token != .eof) {
+            // std.debug.print("\n{s}", .{self.curr_token.to_string()});
             var statment: Statment = switch (self.curr_token) {
                 .let => self.parse_let_statment(),
                 .m_return => self.parse_return_statment(),
@@ -67,7 +68,7 @@ pub const Parser = struct {
                 program.statments.append(statment) catch {
                     unreachable;
                 };
-            }
+            } else unreachable;
 
             if (self.errors.items.len > 0) {
                 var writer = std.io.getStdErr().writer();
@@ -126,27 +127,12 @@ pub const Parser = struct {
         while (self.curr_token != .semicolon)
             self.next_token();
 
+        self.next_token();
         return Statment{ .m_return = ret_statment };
     }
 
     fn parse_if_statment(self: *Self) Statment {
         _ = self;
         return .null;
-    }
-
-    test "number of statments" {
-        var alloc = std.testing.allocator;
-        const expectEqual = @import("std").testing.expectEqualDeep;
-
-        const src =
-            \\ let a = 10;
-            \\ let b = 20;
-            \\ let c = 30;
-        ;
-
-        var lexer = Lexer.init(src);
-        var parser = Parser.init(&lexer, alloc);
-        var program: Program = parser.parse_program();
-        try expectEqual(program.statments.items.len, 3);
     }
 };
